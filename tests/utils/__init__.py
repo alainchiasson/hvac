@@ -1,5 +1,6 @@
 """Collection of methods used by various hvac test cases."""
 import base64
+import codecs
 import json
 import logging
 import operator
@@ -226,6 +227,28 @@ def get_config_file_path(*components):
         os.path.dirname(os.path.realpath(__file__)), "..", "config_files"
     )
     return os.path.join(os.path.abspath(relative_path), *components)
+
+
+def decode_generated_root_token_local(otp, encoded_token, url):
+    """Decode a newly generated root token via Vault CLI.
+
+    :param encoded_token: The token to decode.
+    :type encoded_token: str | unicode
+    :param otp: OTP code to use when decoding the token.
+    :type otp: str | unicode
+    :return: The decoded root token.
+    :rtype: str | unicode
+    """
+
+    # Convert to bytestring, base64 decode token.
+    b_otp = codecs.encode(otp)
+    b_encoded_token = codecs.encode(encoded_token) + (b"=" * (-len(encoded_token) % 4))
+    token = base64.urlsafe_b64decode(b_encoded_token)
+
+    # XOR encoded_token with OTP to recreate root token.
+    root_token = bytes(a ^ b for (a, b) in zip(token, b_otp))
+
+    return root_token
 
 
 def decode_generated_root_token(encoded_token, otp, url):

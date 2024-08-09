@@ -327,7 +327,7 @@ class TestSystemBackend(HvacIntegrationTestCase, TestCase):
         # decode-token on >= 1.13
         new_root_token = ""
         if utils.vault_version_lt("1.13"):
-            new_root_token = utils.decode_generated_root_token(
+            new_root_token = utils.decode_generated_root_token_local(
                 encoded_token=last_generate_root_response["encoded_root_token"],
                 otp=test_otp,
                 url=self.client.url,
